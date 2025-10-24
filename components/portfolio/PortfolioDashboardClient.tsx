@@ -4,6 +4,7 @@ import { usePortfolios } from '@/hooks/usePortfolio';
 import { PortfolioSummary } from './PortfolioSummary';
 import { PortfolioTable } from './PortfolioTable';
 import { PortfolioChart } from './PortfolioChart';
+import { TopPerformers } from './TopPerformers';
 import { AddStockDialog } from './AddStockDialog';
 import { useMultipleStockPrices } from '@/hooks/useStockPrice';
 import { calculateGainLoss } from '@/lib/utils';
@@ -100,7 +101,12 @@ export function PortfolioDashboardClient() {
     <div className="space-y-8">
       <PortfolioSummary summary={summary} />
 
-      <PortfolioChart stocks={stocksWithPrices} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PortfolioChart stocks={stocksWithPrices} />
+        <div className="lg:col-span-2">
+          <TopPerformers stocks={stocksWithPrices} />
+        </div>
+      </div>
 
       <div className="flex items-center justify-between">
         <div>

@@ -3,6 +3,7 @@
 import { usePortfolios } from '@/hooks/usePortfolio';
 import { PortfolioSummary } from './PortfolioSummary';
 import { PortfolioTable } from './PortfolioTable';
+import { PortfolioChart } from './PortfolioChart';
 import { AddStockDialog } from './AddStockDialog';
 import { useMultipleStockPrices } from '@/hooks/useStockPrice';
 import { calculateGainLoss } from '@/lib/utils';
@@ -22,18 +23,14 @@ export function PortfolioDashboardClient() {
   const symbols = useMemo(() => allStocks.map((s) => s.symbol), [allStocks]);
   const { data: prices } = useMultipleStockPrices(symbols);
 
-  // Calculate portfolio summary
-  const summary = useMemo((): PortfolioSummaryType => {
-    if (!prices || allStocks.length === 0) {
-      return {
-        total_market_value: 0,
-        total_cost_basis: 0,
-        total_gain_loss: 0,
-        total_gain_loss_percent: 0,
-      };
-    }
+  const portfolio = portfolios?.[0];
+  const stocks = useMemo(() => portfolio?.stocks || [], [portfolio]);
 
-    const stocksWithPrices: StockWithPrice[] = allStocks.map((stock) => {
+  // Calculate stocks with prices for display and chart
+  const stocksWithPrices: StockWithPrice[] = useMemo(() => {
+    if (!prices || stocks.length === 0) return [];
+
+    return stocks.map((stock) => {
       const currentPrice = prices[stock.symbol]?.current_price || 0;
       const calc = calculateGainLoss(currentPrice, stock.cost_per_share, stock.shares_owned);
 
@@ -47,9 +44,21 @@ export function PortfolioDashboardClient() {
         gain_loss_percent: calc.gainLossPercent,
       };
     });
+  }, [stocks, prices]);
+
+  // Calculate portfolio summary
+  const summary = useMemo((): PortfolioSummaryType => {
+    if (stocksWithPrices.length === 0) {
+      return {
+        total_market_value: 0,
+        total_cost_basis: 0,
+        total_gain_loss: 0,
+        total_gain_loss_percent: 0,
+      };
+    }
 
     const totalMarketValue = stocksWithPrices.reduce((sum, s) => sum + s.market_value, 0);
-    const totalCostBasis = allStocks.reduce(
+    const totalCostBasis = stocks.reduce(
       (sum, s) => sum + s.cost_per_share * s.shares_owned,
       0
     );
@@ -72,7 +81,7 @@ export function PortfolioDashboardClient() {
       best_performer: bestPerformer,
       worst_performer: worstPerformer,
     };
-  }, [prices, allStocks]);
+  }, [stocksWithPrices, stocks]);
 
   if (portfoliosLoading) {
     return (
@@ -87,12 +96,11 @@ export function PortfolioDashboardClient() {
     );
   }
 
-  const portfolio = portfolios?.[0];
-  const stocks = portfolio?.stocks || [];
-
   return (
     <div className="space-y-8">
       <PortfolioSummary summary={summary} />
+
+      <PortfolioChart stocks={stocksWithPrices} />
 
       <div className="flex items-center justify-between">
         <div>

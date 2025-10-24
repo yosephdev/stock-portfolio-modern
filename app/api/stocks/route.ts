@@ -35,13 +35,13 @@ export async function POST(request: Request) {
       .eq('id', validatedData.portfolio_id)
       .single();
 
-    if (portfolioError || !portfolio || portfolio.user_id !== user.id) {
+    if (portfolioError || !portfolio || (portfolio as { user_id: string }).user_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { data, error } = await supabase
       .from('stocks')
-      .insert(validatedData)
+      .insert(validatedData as never)
       .select()
       .single();
 

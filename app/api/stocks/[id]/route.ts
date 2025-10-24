@@ -25,7 +25,7 @@ export async function PUT(
     .eq('id', params.id)
     .single();
 
-  if (!stock || stock.portfolios.user_id !== user.id) {
+  if (!stock || (stock as { portfolios: { user_id: string } }).portfolios.user_id !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -35,7 +35,7 @@ export async function PUT(
       shares_owned: body.shares_owned,
       cost_per_share: body.cost_per_share,
       notes: body.notes,
-    })
+    } as never)
     .eq('id', params.id)
     .select()
     .single();
@@ -69,7 +69,7 @@ export async function DELETE(
     .eq('id', params.id)
     .single();
 
-  if (!stock || stock.portfolios.user_id !== user.id) {
+  if (!stock || (stock as { portfolios: { user_id: string } }).portfolios.user_id !== user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

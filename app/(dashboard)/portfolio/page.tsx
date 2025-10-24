@@ -28,7 +28,7 @@ export default async function PortfolioPage() {
         user_id: user.id,
         name: 'My Portfolio',
         description: 'Main investment portfolio',
-      });
+      } as never);
   }
 
   return (

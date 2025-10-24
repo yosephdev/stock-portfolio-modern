@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { Database } from '@/types/database';
+
+type Portfolio = Database['public']['Tables']['portfolios']['Insert'];
 
 export async function GET() {
   const supabase = await createClient();
@@ -43,13 +46,15 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
+  const portfolioData: Portfolio = {
+    user_id: user.id,
+    name: body.name || 'My Portfolio',
+    description: body.description,
+  };
+
   const { data, error } = await supabase
     .from('portfolios')
-    .insert({
-      user_id: user.id,
-      name: body.name || 'My Portfolio',
-      description: body.description,
-    })
+    .insert(portfolioData)
     .select()
     .single();
 

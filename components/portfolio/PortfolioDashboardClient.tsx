@@ -49,7 +49,7 @@ export function PortfolioDashboardClient() {
     });
 
     const totalMarketValue = stocksWithPrices.reduce((sum, s) => sum + s.market_value, 0);
-    const totalCostBasis = stocksWithPrices.reduce(
+    const totalCostBasis = allStocks.reduce(
       (sum, s) => sum + s.cost_per_share * s.shares_owned,
       0
     );

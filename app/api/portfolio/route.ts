@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from('portfolios')
-    .insert(portfolioData)
+    .insert(portfolioData as never)
     .select()
     .single();
 

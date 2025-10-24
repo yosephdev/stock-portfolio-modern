@@ -53,48 +53,63 @@ ALTER TABLE stocks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stock_prices ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (minimal set)
-CREATE POLICY IF NOT EXISTS "Users can view own profile" ON profiles
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can view own portfolios" ON portfolios;
+DROP POLICY IF EXISTS "Users can create own portfolios" ON portfolios;
+DROP POLICY IF EXISTS "Users can update own portfolios" ON portfolios;
+DROP POLICY IF EXISTS "Users can delete own portfolios" ON portfolios;
+DROP POLICY IF EXISTS "Users can view own stocks" ON stocks;
+DROP POLICY IF EXISTS "Users can create stocks in own portfolios" ON stocks;
+DROP POLICY IF EXISTS "Users can update own stocks" ON stocks;
+DROP POLICY IF EXISTS "Users can delete own stocks" ON stocks;
+DROP POLICY IF EXISTS "Anyone can view stock prices" ON stock_prices;
+
+-- Create policies
+CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY IF NOT EXISTS "Users can insert own profile" ON profiles
+CREATE POLICY "Users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
-CREATE POLICY IF NOT EXISTS "Users can update own profile" ON profiles
+CREATE POLICY "Users can update own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY IF NOT EXISTS "Users can view own portfolios" ON portfolios
+CREATE POLICY "Users can view own portfolios" ON portfolios
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can create own portfolios" ON portfolios
+CREATE POLICY "Users can create own portfolios" ON portfolios
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update own portfolios" ON portfolios
+CREATE POLICY "Users can update own portfolios" ON portfolios
   FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete own portfolios" ON portfolios
+CREATE POLICY "Users can delete own portfolios" ON portfolios
   FOR DELETE USING (auth.uid() = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can view own stocks" ON stocks
+CREATE POLICY "Users can view own stocks" ON stocks
   FOR SELECT USING (
     portfolio_id IN (SELECT id FROM portfolios WHERE user_id = auth.uid())
   );
 
-CREATE POLICY IF NOT EXISTS "Users can create stocks in own portfolios" ON stocks
+CREATE POLICY "Users can create stocks in own portfolios" ON stocks
   FOR INSERT WITH CHECK (
     portfolio_id IN (SELECT id FROM portfolios WHERE user_id = auth.uid())
   );
 
-CREATE POLICY IF NOT EXISTS "Users can update own stocks" ON stocks
+CREATE POLICY "Users can update own stocks" ON stocks
   FOR UPDATE USING (
     portfolio_id IN (SELECT id FROM portfolios WHERE user_id = auth.uid())
   );
 
-CREATE POLICY IF NOT EXISTS "Users can delete own stocks" ON stocks
+CREATE POLICY "Users can delete own stocks" ON stocks
   FOR DELETE USING (
     portfolio_id IN (SELECT id FROM portfolios WHERE user_id = auth.uid())
   );
 
-CREATE POLICY IF NOT EXISTS "Anyone can view stock prices" ON stock_prices
+CREATE POLICY "Anyone can view stock prices" ON stock_prices
   FOR SELECT TO PUBLIC USING (true);
 
 -- Auto-create profile on signup
